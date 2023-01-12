@@ -7,8 +7,8 @@ describe("Testing Uniswap",  function () {
 
     async function deployContracts() {
 
-        const router = (await ethers.getContractAt("IUniswapV2Router02",  process.env.ROUTER_ADDRESS as string));
-        const factory = (await ethers.getContractAt("IUniswapV2Factory", process.env.FACTORY_ADDRESS as string));
+        const router = await ethers.getContractAt("IUniswapV2Router02",  process.env.ROUTER_ADDRESS as string)
+        const factory = await ethers.getContractAt("IUniswapV2Factory", process.env.FACTORY_ADDRESS as string)
         const ERC20 = await ethers.getContractFactory("ERC20")
         const [owner, account, hacker] = await ethers.getSigners()
 

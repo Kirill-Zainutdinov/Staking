@@ -193,7 +193,7 @@ describe("Testing Staking",  function () {
 
     describe("Claim", function () {
         describe("Requires", function () {
-            it("Checking that you can't stake the steak out before the freezingTime has passed", async function () {
+            it("Checking that you can't get reward before the freezingTime has passed", async function () {
                 const { staking, tokenLP, owner, freezingTime } = await loadFixture(deployContractsAndCreatePair)
 
                 const ownerBalance = await tokenLP.balanceOf(owner.address)
@@ -223,6 +223,31 @@ describe("Testing Staking",  function () {
                 expect((await staking.stakes(owner.address)).tokenAmount).to.equal(0)
                 await expect(staking.claim())
                 .to.be.revertedWith("You don't have a stake")
+            })
+
+            it("Checking that you can't get reward if you don't have it", async function () {
+                const { staking, tokenLP, owner, freezingTime } = await loadFixture(deployContractsAndCreatePair)
+
+                const ownerBalance = await tokenLP.balanceOf(owner.address)
+
+                // approve for staking contract
+                let tx = await tokenLP.approve(staking.address, ownerBalance)
+                await tx.wait()
+
+                // do stake
+                tx = await staking.stake(ownerBalance)
+                await tx.wait()
+
+                // moving time
+                await time.increaseTo((await time.latest()) + freezingTime)
+
+                // claim
+                tx = await staking.claim()
+                await tx.wait()
+
+                // claim again
+                await expect(staking.claim())
+                .to.be.revertedWith("You have no reward available for withdrawal")
             })
         })
 
